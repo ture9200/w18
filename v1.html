@@ -93,19 +93,21 @@
 
 </style>
 
+<!-- 팝업창 숨기기 -->
 <div class="pop hide">
     <img src="img/c02.jpg"/>
     <h3>ADD CART</h3>
 </div>
 
-
+<!-- 전체 container -->
 <div class="container">
 
-
-
+    <!-- 위의 여백공간 -->
     <div class="row header">
 
     </div>
+
+    <!-- 메뉴 -->
     <div class="row main">
         <div class="menuDiv">
             <h1>MENU</h1>
@@ -115,18 +117,22 @@
             </ul>
 
         </div>
+
+        <!-- 주문내용창 -->
         <div class="orderDiv">
             <h1>ORDER</h1>
             <ul class="orderList">
-
             </ul>
         </div>
     </div>
 
 </div>
+
+
 <script>
     const popEle = document.querySelector(".pop")
 
+    //1단계 메뉴배열, 주문배열 생성
     const orders = []
 
     const menus = [
@@ -143,10 +149,13 @@
         {name:'한라봉케이크', price:5500, picture:'img/k05.jpg'},
     ]
 
+    //2단계 메뉴 리스트 만들기
     const menuList = document.querySelector(".menuList")
     let str =''
     for (let i = 0; i < menus.length; i++) {
         const menu = menus[i]
+
+        // data-idx값(getAttribute으로 나중에 활용용)을 부여해서주문처리할때 사용
         str += `
                 <li data-idx="${i}">
                     <div class="mdiv">
@@ -158,89 +167,112 @@
     }
     menuList.innerHTML = str
 
+
+    //3단계 li에 클릭이벤트 설정, 메뉴창에서 메뉴 클릭이벤트 설정
     menuList.addEventListener("click", (e)=> {
 
+        //클릭한 요소값을 가져옴
         const target = e.target
+
+        //li와 근접한 곳을 클릭할 경우 li 값을 가져옴
         const liEle = target.closest("li")
 
+        //상품의 idx값을 idx변수에 저장
         const idx = liEle.getAttribute("data-idx")
         console.log("IDX: " + idx)
 
+        //메뉴를 클릭하면 메뉴index 값이 targetMenu로 저장됨
         const targetMenu = menus[idx]
+
+        //선택한 메뉴의 사진
         const targetPicture = targetMenu.picture
+
+        //팝업창의 img를 targetPicture으로 변경
         popEle.querySelector("img").setAttribute("src", targetPicture)
+
+        //팝업창 h3에 idx값 저장
         popEle.querySelector("h3").setAttribute("data-idx", idx)
-        togglePop()
+
+        //팝업창의 클래스를 pop show로 변경
+        popEle.setAttribute("class", "pop show")
     },false)
 
+    //팝업창 나왔을때 한번더 클릭하면 pop hide로 변경
     popEle.addEventListener("click", () => {
         popEle.setAttribute("class", "pop hide")
     },false)
 
-    function togglePop() {
-        const classValue = popEle.getAttribute("class")
-
-        let showFlag = false
-        if(classValue.indexOf("show") > 0){
-            showFlag = true
-        }
-
-        if(showFlag){
-            popEle.setAttribute("class", "pop hide")
-        }else {
-            popEle.setAttribute("class", "pop show")
-        }
-
-    }
 
 
+    //4단계 팝업창에서 클릭한 메뉴의 정보를 addCart에 추가
     document.querySelector(".pop h3").addEventListener("click", e => {
         e.stopPropagation()
         e.preventDefault()
-        const target = e.target
-        const menu = menus[target.getAttribute("data-idx")]
-        console.log(menu)
 
+        //h3에 저장된값을 가져옴
+        const target = e.target
+
+        //상품고유번호라고 생각하면 좋을듯
+        //번호만가지고 menus의 배열값을 가져옴
+        const menu = menus[target.getAttribute("data-idx")]
+        //console.log(menu)
+
+        //선택된 메뉴를 addCart로로
         addCart(menu)
 
     }, false)
 
+    //4-1단계, 중복되는 주문 더하기
     function addCart(menu){
 
+        //orders배열에 중복되는 값이 있으면 result에 저장
+        //oi는 order의 내용, 같은값이 있으면 menu의 값을 result에 저장
+        //첫주문이라면 result는 [] 빈배열
+        //oders에 menu.name이 있다면 menu가 result가 됨
         const result = orders.filter(oi => oi.name === menu.name)
 
         console.log("-------check result-----------")
         console.log(result)
 
+
+        //menu.qty가 1이상이라면, menu.qty에 1추가
         if(result.length > 0){
+            //같은상품의 첫번째 값에만 qty 개수를 샘
             result[0].qty += 1
 
         }else {
+            //처음 주문들어왔을때 qty 1생성
+            //전개 연산자, 메뉴배열에 자연스럽게 qty 합류됨
             orders.push({...menu, qty:1})
+            //console.log(orders)
         }
 
-        console.log(orders)
+        //console.log(orders)
         showOrderItems()
-        togglePop()
     }
 
-
-
+    //4-2단계, 선택된 아이템 order창에 보여주기
     function showOrderItems() {
         const orderListEle = document.querySelector(".orderList")
 
+        //orders배열 주문목록에 있는 정보를 화면 출력
         let str = ''
+        //총합
         let sum = 0
         for (let i = 0; i < orders.length ; i++) {
             const orderItem = orders[i]
             str += `<li>${orderItem.name} ============= ${orderItem.qty} =========== ${orderItem.price * orderItem.qty} </li>`
             sum += orderItem.price * orderItem.qty
         }
+        //for문으로 주문목록 출력이 끝나고 총가격의 계산이 끝나면 마지막으로 한줄 총가격 출력
         str += `<hr/><h1>${sum}</h1>`
         orderListEle.innerHTML = str
 
     }
 
+
 </script>
+
+
 </body>
 </html>
